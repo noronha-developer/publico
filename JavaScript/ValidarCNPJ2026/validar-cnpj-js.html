@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Validação CNPJ 2026 - JavaScript</title>
+
+<script src="CNPJValidator.js"></script>
+
+<script>
+
+function formatarCNPJ(cnpj) {
+
+    cnpj = cnpj.replace(/\W/g,'');
+
+    cnpj = cnpj.replace(/^(\w{2})(\w)/,'$1.$2');
+    cnpj = cnpj.replace(/^(\w{2})\.(\w{3})(\w)/,'$1.$2.$3');
+    cnpj = cnpj.replace(/\.(\w{3})(\w)/,'.$1/$2');
+    cnpj = cnpj.replace(/(\w{4})(\w)/,'$1-$2');
+
+    return cnpj;
+}
+
+function aplicarMascara(el){
+    el.value = formatarCNPJ(el.value);
+}
+
+function validar(){
+
+    const cnpj = document.getElementById("cnpj").value;
+
+    const valido = validarCNPJ2026(cnpj);
+
+    if(valido){
+        alert("CNPJ válido!");
+    }else{
+        alert("CNPJ inválido!");
+    }
+}
+
+</script>
+
+</head>
+
+<body bgcolor="#000000" font face="Arial" size="10" text="#FFFFFF">
+
+<h2>Validação CNPJ 2026 (JavaScript)</h2>
+
+<form onsubmit="event.preventDefault(); validar();">
+
+<label>CNPJ:</label><br>
+
+<input
+    type="text"
+    id="cnpj"
+    maxlength="18"
+    onkeyup="aplicarMascara(this)"
+    placeholder="00.000.000/0000-00"
+>
+
+<br><br>
+
+<button type="submit">Validar</button>
+
+</form>
+
+</body>
+</html>
