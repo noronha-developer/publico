@@ -1,0 +1,86 @@
+#include "totvs.ch"
+
+/*/{Protheus.doc} NewCNPJ
+Função que valida o novo formato de CNPJ
+@type function
+@version  1.0
+@author marcio.noronha
+@since 07/04/2026
+@return logical, .T. se o CNPJ for válido, .F. caso contrário
+/*/
+
+User Function CNPJ2026(cCNPJ as Character) as Logical
+
+    Local cNum   := ""                          as Character
+    Local nI     := 0                           as Numeric
+    Local nPeso1 := {5,4,3,2,9,8,7,6,5,4,3,2}   as Array
+    Local nPeso2 := {6,5,4,3,2,9,8,7,6,5,4,3,2} as Array
+    Local nSoma  := 0                           as Numeric
+    Local nDV1   := 0                           as Numeric
+    Local nDV2   := 0                           as Numeric
+    
+    // Remove máscara
+    cNum := Upper(StrTran(StrTran(StrTran(cCNPJ,".",""),"/",""),"-",""))
+
+    // Valida se o CNPJ tem 14 dígitos
+    If Len(cNum) <> 14
+        Return .F.
+    EndIf
+
+    // ===================================
+    // Calcula DV1 - Dígito Verificador 1
+    // ===================================
+    nSoma := 0
+    For nI := 1 To 12
+        nSoma += _CharToValue(SubStr(cNum,nI,1)) * nPeso1[nI]
+    Next
+
+    nDV1 := 11 - (nSoma % 11)
+    If nDV1 >= 10
+        nDV1 := 0
+    EndIf
+
+    // ===================================
+    // Calcula DV2 - Dígito Verificador 2
+    // ===================================
+    nSoma := 0
+
+    For nI := 1 To 12
+        nSoma += _CharToValue(SubStr(cNum,nI,1)) * nPeso2[nI]
+    Next
+
+    nSoma += nDV1 * nPeso2[13]
+
+    nDV2 := 11 - (nSoma % 11)
+
+    If nDV2 >= 10
+        nDV2 := 0
+    EndIf
+
+    // Validação final
+    If Val(SubStr(cNum,13,1)) == nDV1 .And. Val(SubStr(cNum,14,1)) == nDV2
+        Return .T.
+    EndIf
+
+Return .F.
+
+
+/*/-------------------------------------------------------------------
+Converte caractere alfanumérico para valor numérico
+Regra Receita: ASCII - 48
+-------------------------------------------------------------------*/
+Static Function _CharToValue(cChar)
+
+    Local nAsc := Asc(cChar)
+
+    // 0-9
+    If nAsc >= 48 .And. nAsc <= 57
+        Return nAsc - 48
+    EndIf
+
+    // A-Z
+    If nAsc >= 65 .And. nAsc <= 90
+        Return nAsc - 48
+    EndIf
+
+Return 0  
